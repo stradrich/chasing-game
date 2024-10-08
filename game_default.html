@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Jquery is included here and available for use -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <!-- some basic styles for game setup -->
+    <style>
+      .viewport {
+        height: 500px;
+        width: 500px;
+        border: 1px solid black;
+        margin-bottom: 10px;
+        display: none;
+      }
+      .row {
+        display: table-row;
+      }
+      .game-space {
+        border: 1px dotted gray;
+        width: 50px;
+        height: 50px;
+        display: table-cell;
+      }
+      .ruby {
+        background-image: url(ruby.png);
+        background-repeat: no-repeat;
+        background-size: 40px 25px;
+        background-position: 4px 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="start_game">Start Game</button>
+    <div class="viewport"></div>
+    <div class="form">
+      <!-- File picker will only work with modern browsers! -->
+      <input id="upload_file" type="file" accept="image/png"/>
+    </div>
+    <!-- <img id="uploaded_image" src="bicycle.png" height="45" width="45" /> -->
+  </body>
+</html>
+
+<script>
+//Render function is provided to draw the game board
+const pythonPosition = {x: 0, y: 0};
+// const rubyPosition = {x: 9, y: 9};
+// store ruby ID
+let previousRubyId;
+// store moves (for winning)
+let moveCount = 0;
+let round = 0;
+let uploadedImageSrc = 'python.png'; // default img
+
+var render = function() {
+  $('.viewport').css('display', 'table');
+  var html = "";
+  for(var i=0; i<10; i++) {
+    html += "<div class='row'>";
+    for(var j=0; j<10; j++) {
+      html += "<div class='game-space' id="+i+""+j+">";
+      if(i === 0 && j === 0) {
+        html += "<img src='"+ uploadedImageSrc + "' height=45 width=45>"; // use uploaded image or default
+      }
+      html += "</div>";
+    }
+    html += "</div>";
+  }
+  playGame.setAttribute('disabled', 'disabled'); // disable start button
+  $('.viewport').html(html);
+  
+  annoyingRuby();
+
+  // ruby default mode
+  // const rubyDomElement = document.getElementById('99');
+  // rubyDomElement.classList.add('ruby')
+}
+
+//Your code here. Good luck!
+
+// START GAME:
+const playGame = document.getElementById('start_game');
+playGame.addEventListener('click', render);
+
+// RUBY
+function randomizedRubyPosition() {
+  // random 10 * 10 tiles
+  const randomRubyElement = {
+    x: Math.floor(Math.random() * 10),
+    y: Math.floor(Math.random() * 10)
+  }
+  const randomId = randomRubyElement.x + "" + randomRubyElement.y
+  // console.log(randomId);
+
+  const rubyDomElement = document.getElementById(`${randomId}`);
+  rubyDomElement.classList.add('ruby')
+
+  return randomId;
+}
+
+function annoyingRuby() {
+    // console.log(previousRubyId);
+    
+    // Remove previous ruby
+    if (previousRubyId) {
+      const previousRubyDomElement = document.getElementById(previousRubyId);
+      if (previousRubyDomElement) {
+        previousRubyDomElement.classList.remove('ruby'); // Remove the ruby class
+      }
+    }
+    // Rerender ruby in a new random position
+    previousRubyId = randomizedRubyPosition();
+  }
+
+  // PYTHON
+function removePython(pythonPosition) {
+  const pythonX = pythonPosition.x
+  const pythonY = pythonPosition.y;
+  const idName = pythonX + "" + pythonY;
+  // console.log('remove element', idName);
+  
+  const currentPositionDomElement =  document.getElementById(`${idName}`);
+  // console.log('removing current position', currentPositionDomElement);
+  
+  // remove python image if it exists
+  if (currentPositionDomElement.firstChild) {
+    currentPositionDomElement.removeChild(currentPositionDomElement.firstChild);
+    // console.log('removed python image');
+    
+  }
+}
+
+function addPython() {
+  const pythonX = pythonPosition.x
+  const pythonY = pythonPosition.y;
+  const idName = pythonX + "" + pythonY;
+  // console.log('add element', idName);
+
+  const newPositionDomElement = document.getElementById(`${idName}`);
+  // console.log('adding img into new position', newPositionDomElement);
+  const img = document.createElement("img");
+  // img.src = 'python.png';
+  img.src = uploadedImageSrc;
+  img.height = 45;
+  img.width = 45;
+
+  newPositionDomElement.appendChild(img);
+
+  // console.log('add new image', newPositionDomElement);
+  
+}
+
+// Trigger ArrowUp, ArrowDown, ArrowLeft, ArrowRight (ruby and pyhon interaction)
+document.addEventListener('keydown', function(event) {
+  // console.log('checkpoint 1');
+  let moved = false;
+  // remove and rerender ruby in a random tile
+  annoyingRuby();
+
+  switch (event.key) {
+    case "ArrowUp":
+      // console.log(pythonPosition);
+          // edge cases
+      if (pythonPosition.x > 0) {
+        // remove exising img
+        removePython(pythonPosition);
+        // reposition img
+        pythonPosition.x--;
+        // add img into new position
+        addPython(pythonPosition);
+        // console.log('up');
+        moved = true;
+      }
+        break;
+    case "ArrowDown":
+      // console.log(pythonPosition);
+      
+      // edge cases
+      if (pythonPosition.x >= 0 && pythonPosition.x < 9) {
+        // remove exising img
+        removePython(pythonPosition);
+        // reposition img
+        pythonPosition.x++;
+        // add img into new position
+        addPython(pythonPosition);
+        // console.log('down');
+        moved = true;
+      }
+        break;
+    case "ArrowLeft":
+        // console.log(pythonPosition);
+          // edge cases
+      if (pythonPosition.y > 0) {
+        // remove exising img
+        removePython(pythonPosition);
+        // reposition img
+        pythonPosition.y--;
+        // add img into new position
+        addPython(pythonPosition);
+        // console.log('left');
+        moved = true;
+      }
+        break;
+    case "ArrowRight":
+      // console.log(pythonPosition);
+      
+      // edge cases
+      if (pythonPosition.y >= 0 && pythonPosition.y < 9) {
+        // remove exising img
+        removePython(pythonPosition);
+        // reposition img
+        pythonPosition.y++;
+        // add img into new position
+        addPython(pythonPosition);
+        // console.log('right');
+        moved = true;
+      }
+        break;
+      default:
+        return;
+    }
+
+    // calculate python movements
+    if (moved) {
+      moveCount++;
+      // console.log(moveCount);
+      catchRuby();
+    }
+})
+
+function catchRuby() {
+  // alert message when python and ruby at the same position
+  const pythonX = pythonPosition.x
+  const pythonY = pythonPosition.y;
+  const pythonCurrentPosition = pythonX + "" + pythonY;
+  // console.log(pythonCurrentPosition);
+
+  // console.log(previousRubyId);
+
+  if (pythonCurrentPosition === previousRubyId) {
+    alert(`You take ${moveCount} moves to catch the ruby!`)
+  } else {
+    runawayRuby(pythonX, pythonY)
+  }
+}
+
+function runawayRuby() {
+  // get current ruby position
+  const rubyX = Math.floor(previousRubyId/ 10);
+  const rubyY = previousRubyId % 10;
+  // previousRubyId 
+  // console.log(rubyX);
+  // console.log(rubyY);
+  
+  
+  // move ruby up, down, left, right
+  let newRubyX = rubyX;
+  let newRubyY = rubyY;
+
+  
+  if (pythonPosition.x < rubyX) {
+    newRubyX++; // move ruby down
+  } else if (pythonPosition.x > rubyX) {
+    newRubyX--; // move ruby up
+  }
+  
+  if (pythonPosition.y < rubyY) {
+    newRubyY++ // move ruby right
+  } else if (pythonPosition.y > rubyY) {
+    newRubyY--; //move ruby left
+  }
+  // currentRubyId
+  // console.log('x', newRubyX);
+  // console.log('y', newRubyY);  
+}
+
+// UPLOAD FILE
+const chooseFile = document.getElementById('upload_file');
+chooseFile.addEventListener('change', function(event) {
+  // console.log('uploading');
+  
+  const file = event.target.files[0]; // get the uploaded file
+
+  if (file) {
+    // create filereaderƒ
+    const reader = new FileReader();
+    
+    reader.onload = function(event) {
+      uploadedImageSrc = event.target.result; // update image
+      console.log(uploadedImageSrc);
+      
+      render();
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+</script>
