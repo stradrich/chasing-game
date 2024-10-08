@@ -43,7 +43,8 @@
 <script>
 //Render function is provided to draw the game board
 const pythonPosition = {x: 0, y: 0};
-// const rubyPosition = {x: 9, y: 9};
+// const rubyPosition = {x: 9, y: 9}; // ruby default mode
+
 // store ruby ID
 let previousRubyId;
 // store moves (for winning)
@@ -68,6 +69,8 @@ var render = function() {
   playGame.setAttribute('disabled', 'disabled'); // disable start button
   $('.viewport').html(html);
   
+  addPython();
+
   annoyingRuby();
 
   // ruby default mode
@@ -122,11 +125,8 @@ function removePython(pythonPosition) {
   // console.log('removing current position', currentPositionDomElement);
   
   // remove python image if it exists
-  if (currentPositionDomElement.firstChild) {
-    currentPositionDomElement.removeChild(currentPositionDomElement.firstChild);
-    // console.log('removed python image');
-    
-  }
+  currentPositionDomElement.removeChild(currentPositionDomElement.firstChild);
+  // console.log('removed python image');
 }
 
 function addPython() {
@@ -137,6 +137,12 @@ function addPython() {
 
   const newPositionDomElement = document.getElementById(`${idName}`);
   // console.log('adding img into new position', newPositionDomElement);
+  
+  // Remove existing image if it exists
+  if (newPositionDomElement.firstChild) {
+    newPositionDomElement.removeChild(newPositionDomElement.firstChild);
+  }
+
   const img = document.createElement("img");
   // img.src = 'python.png';
   img.src = uploadedImageSrc;
@@ -227,6 +233,7 @@ document.addEventListener('keydown', function(event) {
     }
 })
 
+// END GAME:
 function catchRuby() {
   // alert message when python and ruby at the same position
   const pythonX = pythonPosition.x
@@ -243,6 +250,7 @@ function catchRuby() {
   }
 }
 
+// not sure why we need to move this, ruby is already moving in random tiles
 function runawayRuby() {
   // get current ruby position
   const rubyX = Math.floor(previousRubyId/ 10);
@@ -288,7 +296,7 @@ chooseFile.addEventListener('change', function(event) {
       uploadedImageSrc = event.target.result; // update image
       console.log(uploadedImageSrc);
       
-      render();
+      addPython();
     };
     reader.readAsDataURL(file);
   }
